@@ -1,0 +1,16 @@
+Package: rbase
+Type: Package
+Title: The morloc prelude for R
+Version: 0.1.0
+Authors@R: person("Zebulun", "Arendsee", email="zbwrnz@gmail.com", role=c("aut","cre"))
+URL: https://github.com/morloclib/rbase
+BugReports: https://github.com/morloclib/rbase/issues
+Description: The morloc prelude for R.
+License: GPL-3
+Depends:
+    R (>= 3.5.0)
+RoxygenNote: 7.1.1
+Suggests:
+    testthat
+LazyData: true
+Encoding: UTF-8

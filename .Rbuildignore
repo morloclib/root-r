@@ -1,0 +1,8 @@
+^\.travis\.yml$
+^codecov\.yml$
+^README\.md$
+^LICENSE\.md$
+package.yaml
+package.yml
+rbase.loc
+.RData

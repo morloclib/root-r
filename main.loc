@@ -1,0 +1,175 @@
+module rbase (*)
+
+import conventions
+
+source R from "R/core.R"
+ ( "mlc_run"           as run
+ , "mlc_id"            as id
+ , "mlc_seq"           as seq
+ , "mlc_const"         as const
+ , "mlc_at"            as at
+ , "mlc_map"           as map
+ , "mlc_head"          as head -- [a] -> a
+ , "mlc_tail"          as tail -- [a]_{n} -> [a]_{n-1}
+ , "mlc_init"          as init -- [a]_{n>i} -> [a]_{n-i}
+ , "mlc_last"          as last -- [a] -> a
+ , "mlc_take"          as take -- i:Int -> [a]_{n>i} -> [a]_{n=i}
+ , "mlc_drop"          as drop -- i:Int -> [a]_{n>i} -> [a]_{n-i}
+ , "mlc_join"          as join
+ , "mlc_zipWith"       as zipWith
+ , "mlc_fold"          as fold
+ , "mlc_enumerateWith" as enumerateWith
+ , "mlc_join"          as join
+ , "mlc_elem"          as elem
+ -- tuples
+ , "mlc_fst" as fst
+ , "mlc_snd" as snd
+ , "mlc_fst" as fst3 -- same as fst in R
+ , "mlc_snd" as snd3 -- same as snd in R
+ , "mlc_thr" as thr3 -- same as thr in R
+ -- comparators
+ , "mlc_not" as not
+ , "mlc_and" as and
+ , "mlc_or" as or
+ )
+
+
+-------------------------------------------------------------------------------
+-- exports from base R
+source R
+ ( "sum"
+ , "as.numeric" as ints2reals
+ )
+
+sum :: [Real] -> Real
+
+-- casting functions - these are all incorrectly typed. Not all values can be
+-- cast into any of these types. Sound resolution of this problem will have to
+-- await the addition of typeclasses.
+ints2reals :: [Int] -> [Real]
+
+source R from "R/core.R" ("mlc_plotVectorPDF" as plotVectorPDF)
+plotVectorPDF :: [Real] -> Str -> ()
+-------------------------------------------------------------------------------
+
+
+instance Show Int where
+  source R from "R/core.R" ("mlc_show" as show)
+
+instance Show Real where
+  source R from "R/core.R" ("mlc_show" as show)
+
+instance Show Str where
+  show x = x
+
+
+instance Sized [a] where
+  source R ("length" as size)
+
+instance Sized Str where
+  source R ("nchar" as size)
+
+
+instance Ord Int where
+  source R from "R/core.R"
+    ( "mlc_le" as le
+    , "mlc_lt" as lt
+    , "mlc_ge" as ge
+    , "mlc_gt" as gt
+    )
+
+instance Ord Real where
+  source R from "R/core.R"
+    ( "mlc_le" as le
+    , "mlc_lt" as lt
+    , "mlc_ge" as ge
+    , "mlc_gt" as gt
+    )
+
+instance Ord Int where
+  source R from "R/core.R"
+    ( "mlc_le" as le
+    , "mlc_lt" as lt
+    , "mlc_ge" as ge
+    , "mlc_gt" as gt
+    )
+
+
+instance Eq Real where
+  source R from "R/core.R"
+    ( "mlc_eq" as eq
+    , "mlc_ne" as ne
+    )
+
+instance Eq Int where
+  source R from "R/core.R"
+    ( "mlc_eq" as eq
+    , "mlc_ne" as ne
+    )
+
+instance Eq Str where
+  source R from "R/core.R"
+    ( "mlc_eq" as eq
+    , "mlc_ne" as ne
+    )
+
+
+instance Addable Int where
+  source R from "R/core.R"
+   ( "mlc_add" as add
+   , "mlc_mul" as mul
+   , "mlc_mod" as mod
+   , "mlc_div" as div
+   )
+  zero = 0
+  one = 1
+
+instance Subtractable Int where
+  source R from "R/core.R"
+   ( "mlc_neg" as neg
+   , "mlc_sub" as sub
+   )
+
+
+instance Addable Real where
+  source R from "R/core.R"
+   ( "mlc_add" as add
+   , "mlc_mul" as mul
+   , "mlc_mod" as mod
+   , "mlc_div" as div
+   )
+  zero = 0.0
+  one = 1.0
+
+
+instance Subtractable Real where
+  source R from "R/core.R"
+   ( "mlc_neg" as neg
+   , "mlc_sub" as sub
+   )
+
+
+
+-------------------------------------------------------------------------------
+--                 Pack and Unpack internal functions                          
+-- These functions are used by morloc internally for (de)serialization of types
+-- that cannot be automatically (de)serialized into/from JSON. They should not
+-- be exported.
+-------------------------------------------------------------------------------
+
+-- WARNING: The Map implementation in R is total crap. R doesn't have a general
+-- map type, at least not in base. The `list` type works properly only for
+-- string keys. So the Map type here is mostly just for testing purposes.
+type R => (Map key val) = "list" key val
+
+instance Packable ([Str],[val]) (Map Str val) where
+  source R from "R/data.R"
+   ( "mlc_pack_map" as pack
+   , "mlc_unpack_map" as unpack
+   )
+
+instance Packable (Int) Unit where
+  source R from "R/data.R"
+   ( "morloc_packUnit" as pack
+   , "morloc_unpackUnit" as unpack
+   )
