@@ -1,6 +1,6 @@
-module rbase (*)
+module base-r (*)
 
-import conventions
+import base
 
 source R from "R/core.R"
  ( "mlc_run"           as run

@@ -1,4 +1,4 @@
 library(testthat)
-library(rbase)
+library(base_r)
 
-test_check("rbase")
+test_check("base_r")

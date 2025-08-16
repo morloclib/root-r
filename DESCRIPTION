@@ -1,10 +1,10 @@
-Package: rbase
+Package: base_r
 Type: Package
 Title: The morloc prelude for R
 Version: 0.1.0
 Authors@R: person("Zebulun", "Arendsee", email="zbwrnz@gmail.com", role=c("aut","cre"))
-URL: https://github.com/morloclib/rbase
-BugReports: https://github.com/morloclib/rbase/issues
+URL: https://github.com/morloclib/base-r
+BugReports: https://github.com/morloclib/base-r/issues
 Description: The morloc prelude for R.
 License: GPL-3
 Depends:
