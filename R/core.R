@@ -48,11 +48,11 @@ morloc_map <- function(f, xs){
 }
 
 morloc_at <- function(i, xs){
-  return xs[i]
+  xs[i]
 }
 
 morloc_slice <- function(i, j, xs){
-  return xs[i-1:min(j, length(xs))]
+  xs[i-1:min(j, length(xs))]
 }
 
 morloc_zipWith <- function(f, xs, ys){
@@ -99,10 +99,6 @@ plotPDF <- function(x, filename){
   plot(x)
   dev.off()
   NULL
-}
-
-morloc_join_c <- funcction(x, y){
-
 }
 
 morloc_plotVectorPDF <- function(...){
