@@ -1,13 +1,13 @@
-name: base-r
+name: root-r
 version: 0.1.0
-homepage: https://github.com/morloclib/base-r
-synopsis: Morloc prelude for R
+homepage: https://github.com/morloclib/root-r
+synopsis: R implementations for root functions
 description: Morloc prelude for R. Still evolving in tandem with the C++ and
   Python3 cousins. See https://github.com/morloc-project/morloc for more info
   on the morloc language itself.
 category: language-base
 license: MIT
 author: "Zebulun Arendsee"
-maintainer: "zbwrnz@gmail.com"
-github: https://github.com/morloclib/base-r
-bug-reports: https://github.com/morloclib/base-r/issues
+maintainer: "z@morloc.io"
+github: https://github.com/morloclib/root-r
+bug-reports: https://github.com/morloclib/root-r/issues

@@ -1,10 +1,10 @@
-mlc_plotPDF <- function(x, filename){
+morloc_plotPDF <- function(x, filename){
   pdf(filename)
   plot(x)
   dev.off()
   NULL
 }
 
-mlc_plotVectorPDF <- function(...){
+morloc_plotVectorPDF <- function(...){
   plotPDF(...)
 }
