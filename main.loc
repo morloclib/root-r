@@ -7,7 +7,7 @@ idr a :: a -> a
 
 zipWith a b c :: (a -> b -> c) -> [a] -> [b] -> [c]
 
-source R from "core.R"
+source R from "R/core.R"
     ( "morloc_idr" as idr
     , "morloc_zipWith" as zipWith
     , "morloc_fst" as fst
@@ -25,14 +25,14 @@ source R from "core.R"
 
 instance Eq a where
   -- this will work for any type that defines a '==' operator
-  source R from "core.R" ("morloc_eq" as eq)
+  source R from "R/core.R" ("morloc_eq" as eq)
 
 instance Ord a where
   -- this will work for any type that defines a '<=' operator
-  source R from "core.R" ("morloc_le" as le)
+  source R from "R/core.R" ("morloc_le" as le)
 
 instance Integral Int where
-  source R from "core.R"
+  source R from "R/core.R"
     ( "morloc_neg" as neg
     , "morloc_add" as add
     , "morloc_sub" as sub
@@ -41,7 +41,7 @@ instance Integral Int where
   zero = 0
 
 instance Integral Real where
-  source R from "core.R"
+  source R from "R/core.R"
     ( "morloc_neg" as neg
     , "morloc_add" as add
     , "morloc_sub" as sub
@@ -50,7 +50,7 @@ instance Integral Real where
   zero = 0.0
 
 instance Numeric Real where
-  source R from "core.R"
+  source R from "R/core.R"
     ( "morloc_inv" as inv
     , "morloc_div" as div
     , "morloc_exp" as exp
@@ -61,22 +61,22 @@ instance Numeric Real where
 
 instance Monoid Str where
   mempty = ""
-  source R from "core.R" ("paste" as mappend)
+  source R from "R/core.R" ("paste" as mappend)
 
 instance Monoid (List a) where
   mempty = []
-  source R from "core.R" ("c" as mappend)
+  source R from "R/core.R" ("c" as mappend)
 
 
 instance Foldable List where
-  source R from "core.R" ("morloc_fold" as fold)
+  source R from "R/core.R" ("morloc_fold" as fold)
 
 instance Functor List where
-  source R from "core.R" ("morloc_map" as map)
+  source R from "R/core.R" ("morloc_map" as map)
 
 instance Sequence List where
   empty = []
-  source R from "core.R"
+  source R from "R/core.R"
     ( "morloc_at" as at
     , "morloc_slice" as slice
     )
