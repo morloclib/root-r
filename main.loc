@@ -36,6 +36,7 @@ instance Integral Int where
     ( "morloc_neg" as neg
     , "morloc_add" as add
     , "morloc_sub" as sub
+    , "morloc_mul" as mul
     )
   zero = 0
 
@@ -44,13 +45,13 @@ instance Integral Real where
     ( "morloc_neg" as neg
     , "morloc_add" as add
     , "morloc_sub" as sub
+    , "morloc_mul" as mul
     )
   zero = 0.0
 
 instance Numeric Real where
   source R from "core.R"
     ( "morloc_inv" as inv
-    , "morloc_mul" as mul
     , "morloc_div" as div
     , "morloc_exp" as exp
     , "morloc_log" as log
