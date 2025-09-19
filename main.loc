@@ -2,8 +2,12 @@ module root-r (*)
 
 import root
 
+--' An identity function used to force R usage
+idr a :: a -> a
+
 source R from "core.R"
-    ( "morloc_fst" as fst
+    ( "morloc_idr" as idr
+    , "morloc_fst" as fst
     , "morloc_snd" as snd
     , "morloc_toFst" as toFst
     , "morloc_toSnd" as toSnd
