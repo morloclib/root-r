@@ -5,8 +5,6 @@ import root
 --' An identity function used to force R usage
 idr a :: a -> a
 
-zipWith a b c :: (a -> b -> c) -> [a] -> [b] -> [c]
-
 source R from "R/core.R"
     ( "morloc_idr" as idr
     , "morloc_zipWith" as zipWith

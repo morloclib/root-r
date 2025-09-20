@@ -15,10 +15,6 @@ morloc_run <- function(f){
     f()
 }
 
-morloc_id <- function(x){
-  x
-}
-
 morloc_seq <- function(x, y){
   y
 }
