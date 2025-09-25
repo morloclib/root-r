@@ -106,7 +106,6 @@ instance Sequence List where
 -- WARNING: The Map implementation in R is total crap. R doesn't have a general
 -- map type, at least not in base. The `list` type works properly only for
 -- string keys. So the Map type here is mostly just for testing purposes.
-type R => (Map key val) = "list" key val
 
 instance Packable ([Str],[val]) (Map Str val) where
   source R from "R/data.R"
