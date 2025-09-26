@@ -2,3 +2,5 @@
 .Rhistory
 *.o
 *.so
+nexus*
+pool*

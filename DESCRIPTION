@@ -10,7 +10,5 @@ License: GPL-3
 Depends:
     R (>= 3.5.0)
 RoxygenNote: 7.1.1
-Suggests:
-    testthat
 LazyData: true
 Encoding: UTF-8

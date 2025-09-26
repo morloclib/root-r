@@ -31,24 +31,27 @@ morloc_ifelse <- function(cond, x, y){
   }
 }
 
+# morloc is 0-based and R is 1-based, so indices need to be adjusted
 morloc_at <- function(i, xs){
   if (is.list(xs)){
-    xs[[i]]
+    xs[[i+1]]
   } else {
-    xs[i]
+    xs[i+1]
   }
 }
 
+# NOTE: i and j are expected to be 0-based
+morloc_slice <- function(i, j, xs){
+  if((i+1) > j || (i+1) > length(xs)){
+    xs[0]
+  } else {
+    xs[(i+1):min(j, length(xs))]
+  }
+}
+
+
 morloc_map <- function(f, xs){
   sapply(xs, f)  
-}
-
-morloc_at <- function(i, xs){
-  xs[i]
-}
-
-morloc_slice <- function(i, j, xs){
-  xs[i-1:min(j, length(xs))]
 }
 
 morloc_zipWith <- function(f, xs, ys){

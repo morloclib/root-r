@@ -1,0 +1,4 @@
+module test-root-r (test)
+
+import root.test (test)
+import root-r
