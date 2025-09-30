@@ -2,7 +2,6 @@ module root-r (*)
 
 import root
 
-type R => Filename = "character"
 type R => Unit = "NULL"
 type R => Int = "integer"
 type R => Real = "numeric"
