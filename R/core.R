@@ -50,8 +50,36 @@ morloc_slice <- function(i, j, xs){
 }
 
 
-morloc_map <- function(f, xs){
-  sapply(xs, f)  
+# TODO: could I pass type info from Morloc to run the right mapping function?
+# Alternatively, perhaps typeclasses could do it?
+morloc_map <- function(f, xs) {
+
+  if (length(xs) == 0) {
+    return(list())
+  }
+
+  # Use vapply if we can determine output type from first element
+  first_result <- f(xs[[1]])
+  
+  if (length(first_result) == 1 && is.atomic(first_result)) {
+    # Use vapply for type-safe vectorized operation
+    if (is.logical(first_result)) {
+      return(vapply(xs, f, FUN.VALUE = logical(1)))
+    } else if (is.integer(first_result)) {
+      return(vapply(xs, f, FUN.VALUE = integer(1)))
+    } else if (is.double(first_result) || is.numeric(first_result)) {
+      return(vapply(xs, f, FUN.VALUE = numeric(1)))
+    } else if (is.character(first_result)) {
+      return(vapply(xs, f, FUN.VALUE = character(1)))
+    } else if (is.raw(first_result)) {
+      return(vapply(xs, f, FUN.VALUE = raw(1)))
+    } else if (is.complex(first_result)) {
+      return(vapply(xs, f, FUN.VALUE = complex(1)))
+    }
+  }
+  
+  # Fallback to lapply for complex outputs
+  return(lapply(xs, f))
 }
 
 morloc_zipWith <- function(f, xs, ys){
