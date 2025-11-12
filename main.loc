@@ -23,13 +23,8 @@ idr a :: a -> a
 source R from "R/core.R"
     ( "morloc_idr" as idr
     , "morloc_zipWith" as zipWith
-    , "morloc_fst" as fst
-    , "morloc_snd" as snd
     , "morloc_toFst" as toFst
     , "morloc_toSnd" as toSnd
-    , "morloc_fst" as fst3
-    , "morloc_snd" as snd3
-    , "morloc_thr" as thr3
     , "morloc_ifelse" as ifelse
     , "morloc_not" as not
     , "morloc_and" as and

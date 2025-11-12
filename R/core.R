@@ -1,9 +1,5 @@
 morloc_idr <- function(x) x
 
-morloc_fst <- function(x) x[[1]]
-morloc_snd <- function(x) x[[2]]
-morloc_thr <- function(x) x[[3]]
-
 morloc_toFst <- function(f, x) list(f(x), x)
 morloc_toSnd <- function(f, x) list(x, f(x))
 
