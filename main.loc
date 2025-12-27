@@ -29,6 +29,8 @@ source R from "R/core.R"
     , "morloc_not" as not
     , "morloc_and" as and
     , "morloc_or" as or
+    , "rev" as reverse
+    , "morloc_sort" as sort
     )
 
 instance Eq a where

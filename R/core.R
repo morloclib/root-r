@@ -78,6 +78,17 @@ morloc_map <- function(f, xs) {
   return(lapply(xs, f))
 }
 
+morloc_sort <- function(xs) {
+  if(length(xs) <= 1){
+    return(xs)
+  }
+  if (is.list(xs)) {
+    return(xs[order(unlist(xs))])
+  } else {
+    return(sort(xs))
+  }
+}
+
 morloc_zipWith <- function(f, xs, ys){
   N <- min(length(xs), length(ys))
   zs <- as.list(rep(NA, N))
