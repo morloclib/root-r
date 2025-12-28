@@ -92,6 +92,11 @@ instance Sequence List where
     , "morloc_slice" as slice
     )
 
+instance Show Int where
+  source R ("as.character" as show)
+
+instance Show Real where
+  source R ("as.character" as show)
 
 -------------------------------------------------------------------------------
 --                 Pack and Unpack internal functions                          
