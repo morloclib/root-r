@@ -22,41 +22,65 @@ idr a :: a -> a
 
 source R from "R/core.R"
     ( "morloc_idr" as idr
-    , "morloc_zipWith" as zipWith
     , "morloc_toFst" as toFst
     , "morloc_toSnd" as toSnd
     , "morloc_ifelse" as ifelse
+    , "morloc_branch" as branch
     , "morloc_not" as not
     , "morloc_and" as (&&)
     , "morloc_or" as (||)
+    , "morloc_zipWith" as zipWith
     , "rev" as reverse
     , "morloc_sort" as sort
+    , "morloc_sortBy" as sortBy
     , "Filter" as filter
+    , "morloc_unzip" as unzip
+    , "morloc_replicate" as replicate
+    , "morloc_takeWhile" as takeWhile
+    , "morloc_dropWhile" as dropWhile
+    , "morloc_partition" as partition
+    , "morloc_scanl" as scanl
+    , "morloc_enumerate" as enumerate
+    , "morloc_intersperse" as intersperse
+    , "morloc_keys" as keys
+    , "morloc_vals" as values
+    , "morloc_lookup" as lookup
+    , "morloc_insert" as insert
+    , "morloc_delete" as delete
+    , "morloc_from_list" as fromList
+    , "morloc_to_list" as toList
+    , "morloc_map_val" as mapValues
+    , "morloc_map_key" as mapKeys
+    , "morloc_filter_map" as filterMap
     )
 
 instance Eq a where
-  -- this will work for any type that defines a '==' operator
   source R from "R/core.R" ("morloc_eq" as (==))
 
 instance Ord a where
-  -- this will work for any type that defines a '<=' operator
   source R from "R/core.R" ("morloc_le" as (<=))
 
 instance Integral Int where
   source R from "R/core.R"
     ( "morloc_neg" as neg
+    , "morloc_abs" as abs
     , "morloc_add" as (+)
     , "morloc_sub" as (-)
     , "morloc_mul" as (*)
+    , "morloc_intdiv" as (//)
+    , "morloc_mod" as (%)
     )
   zero = 0
 
 instance Integral Real where
   source R from "R/core.R"
     ( "morloc_neg" as neg
+    , "morloc_abs" as abs
     , "morloc_add" as (+)
     , "morloc_sub" as (-)
     , "morloc_mul" as (*)
+    , "morloc_div" as (//)
+    , "morloc_mod" as (%)
     )
   zero = 0.0
 
@@ -64,15 +88,13 @@ instance Numeric Real where
   source R from "R/core.R"
     ( "morloc_inv" as inv
     , "morloc_div" as (/)
-    , "morloc_exp" as (**)
-    , "morloc_log" as log
+    , "morloc_pow" as (**)
+    , "morloc_ln" as ln
     )
-  one = 1.0
-
 
 instance Monoid Str where
   mempty = ""
-  source R from "R/core.R" ("paste" as (<>))
+  source R from "R/core.R" ("morloc_str_add" as (<>))
 
 instance Monoid (List a) where
   mempty = []
@@ -92,14 +114,11 @@ instance Sequence List where
     , "morloc_slice" as slice
     )
 
-instance Show Int where
-  source R ("as.character" as show)
-
-instance Show Real where
-  source R ("as.character" as show)
+instance Show a where
+  source R from "R/core.R" ("morloc_show" as show)
 
 -------------------------------------------------------------------------------
---                 Pack and Unpack internal functions                          
+--                 Pack and Unpack internal functions
 -- These functions are used by morloc internally for (de)serialization of types
 -- that cannot be automatically (de)serialized into/from JSON. They should not
 -- be exported.
