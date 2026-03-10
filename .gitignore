@@ -1,6 +1,6 @@
+test
+pools/
 .RData
 .Rhistory
 *.o
 *.so
-nexus*
-pool*

@@ -1,8 +1,5 @@
 morloc_idr <- function(x) x
 
-morloc_toFst <- function(f, x) list(f(x), x)
-morloc_toSnd <- function(f, x) list(x, f(x))
-
 # --- Boolean operations ---
 
 morloc_not <- function(x) !x
@@ -84,14 +81,6 @@ morloc_le <- function(x, y) x <= y
 
 # --- Control flow ---
 
-morloc_ifelse <- function(cond, x, y) {
-  if (cond) {
-    x
-  } else {
-    y
-  }
-}
-
 morloc_branch <- function(cond, fa, fb, x) {
   if (cond(x)) {
     fa(x)
@@ -114,8 +103,6 @@ morloc_inv <- function(x) 1 / x
 morloc_div <- function(x, y) x / y
 morloc_pow <- function(x, y) x ^ y
 morloc_ln <- function(x) log(x)
-
-morloc_show <- function(x) as.character(x)
 
 # --- Sequence operations ---
 
@@ -211,6 +198,27 @@ morloc_fold <- function(f, init, xs) {
   Reduce(f = f, x = xs, init = init, accumulate = FALSE)
 }
 
+morloc_fold1 <- function(f, xs) {
+  acc <- xs[[1]]
+  if (length(xs) > 1) {
+    for (i in 2:length(xs)) {
+      acc <- f(acc, xs[[i]])
+    }
+  }
+  acc
+}
+
+morloc_safeFold1 <- function(f, xs) {
+  if (length(xs) == 0) return(NULL)
+  acc <- xs[[1]]
+  if (length(xs) > 1) {
+    for (i in 2:length(xs)) {
+      acc <- f(acc, xs[[i]])
+    }
+  }
+  acc
+}
+
 morloc_unzip <- function(xs) {
   if (length(xs) == 0) return(list(list(), list()))
   a <- lapply(xs, function(x) x[[1]])
@@ -281,69 +289,133 @@ morloc_enumerate <- function(xs) {
 
 morloc_str_add <- function(x, y) paste0(x, y)
 
-# --- Map operations ---
+# --- Stack operations ---
 
-# WARNING: The Map implementation in R is limited. R doesn't have a general
-# map type. The named `list` type works properly only for string keys.
-
-morloc_keys <- function(m) {
-  as.list(names(m))
+morloc_cons <- function(x, xs) {
+  c(list(x), xs)
 }
 
-morloc_vals <- function(m) {
-  unname(as.list(m))
+morloc_uncons <- function(xs) {
+  list(xs[[1]], xs[-1])
 }
 
-morloc_lookup <- function(key, m) {
-  m[[key]]
+# --- Queue operations ---
+
+morloc_snoc <- function(xs, x) {
+  c(xs, list(x))
 }
 
-morloc_insert <- function(key, val, m) {
-  result <- m
-  result[[key]] <- val
-  result
+morloc_unsnoc <- function(xs) {
+  n <- length(xs)
+  list(xs[-n], xs[[n]])
 }
 
-morloc_delete <- function(key, m) {
-  result <- m
-  result[[key]] <- NULL
-  result
-}
+# --- New list operations ---
 
-morloc_from_list <- function(xs) {
+morloc_iterate <- function(n, f, x) {
   result <- list()
-  for (pair in xs) {
-    result[[pair[[1]]]] <- pair[[2]]
+  for (i in seq_len(n)) {
+    result <- c(result, list(x))
+    x <- f(x)
   }
   result
 }
 
-morloc_to_list <- function(m) {
-  lapply(names(m), function(k) list(k, m[[k]]))
-}
-
-morloc_map_key <- function(f, m) {
+morloc_groupBy <- function(eq, xs) {
+  if (length(xs) == 0) return(list())
   result <- list()
-  for (k in names(m)) {
-    result[[f(k)]] <- m[[k]]
+  group <- list(xs[[1]])
+  if (length(xs) > 1) {
+    for (i in 2:length(xs)) {
+      if (eq(xs[[i-1]], xs[[i]])) {
+        group <- c(group, list(xs[[i]]))
+      } else {
+        result <- c(result, list(group))
+        group <- list(xs[[i]])
+      }
+    }
   }
+  result <- c(result, list(group))
   result
 }
 
-morloc_map_val <- function(f, m) {
-  result <- list()
-  for (k in names(m)) {
-    result[[k]] <- f(m[[k]])
+morloc_find <- function(f, xs) {
+  for (x in xs) {
+    if (f(x)) return(x)
   }
-  result
+  return(NULL)
 }
 
-morloc_filter_map <- function(f, m) {
+morloc_unique <- function(xs) {
   result <- list()
-  for (k in names(m)) {
-    if (f(k, m[[k]])) {
-      result[[k]] <- m[[k]]
+  seen <- list()
+  for (x in xs) {
+    found <- FALSE
+    for (s in seen) {
+      if (morloc_eq(s, x)) {
+        found <- TRUE
+        break
+      }
+    }
+    if (!found) {
+      seen <- c(seen, list(x))
+      result <- c(result, list(x))
     }
   }
   result
 }
+
+morloc_groupSort <- function(xs) {
+  if (length(xs) == 0) return(list())
+  keys <- sapply(xs, function(x) x[[1]])
+  vals <- lapply(xs, function(x) x[[2]])
+  unique_keys <- sort(unique(keys))
+  result <- list()
+  for (k in unique_keys) {
+    group_vals <- vals[keys == k]
+    result <- c(result, list(list(k, group_vals)))
+  }
+  result
+}
+
+morloc_range <- function(a, b) {
+  if (a > b) return(list())
+  as.list(a:b)
+}
+
+morloc_rangeStep <- function(a, b, step) {
+  if (a > b) return(list())
+  as.list(seq(a, b, by = step))
+}
+
+# --- Readable operations ---
+
+morloc_read_int <- function(s) {
+  result <- suppressWarnings(as.integer(s))
+  if (is.na(result)) return(NULL)
+  result
+}
+
+morloc_read_real <- function(s) {
+  result <- suppressWarnings(as.numeric(s))
+  if (is.na(result)) return(NULL)
+  result
+}
+
+morloc_read_str <- function(s) {
+  s
+}
+
+morloc_read_bool <- function(s) {
+  if (s %in% c("true", "True", "TRUE")) return(TRUE)
+  if (s %in% c("false", "False", "FALSE")) return(FALSE)
+  return(NULL)
+}
+
+# --- Sequence conversions ---
+# In R, all sequence types map to list, so these are identity functions
+
+morloc_toDeque <- function(xs) xs
+morloc_toVector <- function(xs) xs
+morloc_toArray <- function(xs) xs
+

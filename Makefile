@@ -1,6 +1,6 @@
 test:
-	morloc make test.loc
-	./nexus test
+	morloc make -o test test.loc
+	./test
 
 clean:
-	rm -rf nexus nexus.c pool*
+	rm -rf test pools/

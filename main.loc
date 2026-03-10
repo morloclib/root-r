@@ -7,8 +7,10 @@ type R => Int = "integer"
 type R => Real = "numeric"
 type R => Str = "character"
 type R => Bool = "logical"
-type R => (Map a b) = "list" a b
 type R => (List a) = "list" a
+type R => (Vector a) = "list" a
+type R => (Array a) = "list" a
+type R => (Deque a) = "list" a
 type R => (Tuple2 a b) = "list" a b
 type R => (Tuple3 a b c) = "list" a b c
 type R => (Tuple4 a b c d) = "list" a b c d
@@ -22,9 +24,6 @@ idr a :: a -> a
 
 source R from "R/core.R"
     ( "morloc_idr" as idr
-    , "morloc_toFst" as toFst
-    , "morloc_toSnd" as toSnd
-    , "morloc_ifelse" as ifelse
     , "morloc_branch" as branch
     , "morloc_not" as not
     , "morloc_and" as (&&)
@@ -42,16 +41,16 @@ source R from "R/core.R"
     , "morloc_scanl" as scanl
     , "morloc_enumerate" as enumerate
     , "morloc_intersperse" as intersperse
-    , "morloc_keys" as keys
-    , "morloc_vals" as values
-    , "morloc_lookup" as lookup
-    , "morloc_insert" as insert
-    , "morloc_delete" as delete
-    , "morloc_from_list" as fromList
-    , "morloc_to_list" as toList
-    , "morloc_map_val" as mapValues
-    , "morloc_map_key" as mapKeys
-    , "morloc_filter_map" as filterMap
+    , "morloc_iterate" as iterate
+    , "morloc_groupBy" as groupBy
+    , "morloc_find" as find
+    , "morloc_unique" as unique
+    , "morloc_groupSort" as groupSort
+    , "morloc_range" as range
+    , "morloc_rangeStep" as rangeStep
+    , "morloc_toDeque" as toDeque
+    , "morloc_toVector" as toVector
+    , "morloc_toArray" as toArray
     )
 
 instance Eq a where
@@ -92,30 +91,129 @@ instance Numeric Real where
     , "morloc_ln" as ln
     )
 
+instance Semigroup Str where
+  source R from "R/core.R" ("morloc_str_add" as (<>))
+
 instance Monoid Str where
   mempty = ""
-  source R from "R/core.R" ("morloc_str_add" as (<>))
+
+instance Semigroup (List a) where
+  source R from "R/core.R" ("c" as (<>))
 
 instance Monoid (List a) where
   mempty = []
-  source R from "R/core.R" ("c" as (<>))
 
 
+-- List instances
 instance Foldable List where
-  source R from "R/core.R" ("morloc_fold" as fold)
+  source R from "R/core.R"
+    ( "morloc_fold" as fold
+    , "morloc_fold1" as fold1
+    , "morloc_safeFold1" as safeFold1
+    )
 
 instance Functor List where
   source R from "R/core.R" ("morloc_map" as map)
 
-instance Sequence List where
-  empty = []
+instance Indexed List where
   source R from "R/core.R"
     ( "morloc_at" as at
     , "morloc_slice" as slice
     )
 
+instance Stack List where
+  source R from "R/core.R"
+    ( "morloc_cons" as cons
+    , "morloc_uncons" as uncons
+    )
+
+instance Queue List where
+  source R from "R/core.R"
+    ( "morloc_snoc" as snoc
+    , "morloc_unsnoc" as unsnoc
+    )
+
+
+-- Deque instances (R uses list for all sequence types)
+instance Foldable Deque where
+  source R from "R/core.R"
+    ( "morloc_fold" as fold
+    , "morloc_fold1" as fold1
+    , "morloc_safeFold1" as safeFold1
+    )
+
+instance Functor Deque where
+  source R from "R/core.R" ("morloc_map" as map)
+
+instance Stack Deque where
+  source R from "R/core.R"
+    ( "morloc_cons" as cons
+    , "morloc_uncons" as uncons
+    )
+
+instance Queue Deque where
+  source R from "R/core.R"
+    ( "morloc_snoc" as snoc
+    , "morloc_unsnoc" as unsnoc
+    )
+
+instance Semigroup (Deque a) where
+  source R from "R/core.R" ("c" as (<>))
+
+
+-- Vector instances (R uses list for all sequence types)
+instance Foldable Vector where
+  source R from "R/core.R"
+    ( "morloc_fold" as fold
+    , "morloc_fold1" as fold1
+    , "morloc_safeFold1" as safeFold1
+    )
+
+instance Functor Vector where
+  source R from "R/core.R" ("morloc_map" as map)
+
+instance Indexed Vector where
+  source R from "R/core.R"
+    ( "morloc_at" as at
+    , "morloc_slice" as slice
+    )
+
+instance Queue Vector where
+  source R from "R/core.R"
+    ( "morloc_snoc" as snoc
+    , "morloc_unsnoc" as unsnoc
+    )
+
+instance Semigroup (Vector a) where
+  source R from "R/core.R" ("c" as (<>))
+
+
+-- Array instances (R uses list for all sequence types)
+instance Foldable Array where
+  source R from "R/core.R"
+    ( "morloc_fold" as fold
+    , "morloc_fold1" as fold1
+    , "morloc_safeFold1" as safeFold1
+    )
+
+instance Functor Array where
+  source R from "R/core.R" ("morloc_map" as map)
+
+instance Indexed Array where
+  source R from "R/core.R"
+    ( "morloc_at" as at
+    , "morloc_slice" as slice
+    )
+
+instance Semigroup (Array a) where
+  source R from "R/core.R" ("c" as (<>))
+
+
 instance Show a where
-  source R from "R/core.R" ("morloc_show" as show)
+  show x = @show x
+
+instance Readable a where
+  read x = @read x
 
 -------------------------------------------------------------------------------
 --                 Pack and Unpack internal functions
@@ -123,16 +221,6 @@ instance Show a where
 -- that cannot be automatically (de)serialized into/from JSON. They should not
 -- be exported.
 -------------------------------------------------------------------------------
-
--- WARNING: The Map implementation in R is total crap. R doesn't have a general
--- map type, at least not in base. The `list` type works properly only for
--- string keys. So the Map type here is mostly just for testing purposes.
-
-instance Packable ([Str],[val]) (Map Str val) where
-  source R from "R/data.R"
-   ( "morloc_pack_map" as pack
-   , "morloc_unpack_map" as unpack
-   )
 
 instance Packable (Int) Unit where
   source R from "R/data.R"
