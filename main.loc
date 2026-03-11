@@ -59,155 +59,117 @@ instance Eq a where
 instance Ord a where
   source R from "R/core.R" ("morloc_le" as (<=))
 
-instance Integral Int where
+instance Integral Int
+       , Integral Int8
+       , Integral Int16
+       , Integral Int32
+       , Integral Int64
+       , Integral UInt8
+       , Integral UInt16
+       , Integral UInt32
+       , Integral UInt64 where
+  %inline
   source R from "R/core.R"
     ( "morloc_neg" as neg
     , "morloc_abs" as abs
-    , "morloc_add" as (+)
-    , "morloc_sub" as (-)
-    , "morloc_mul" as (*)
-    , "morloc_intdiv" as (//)
-    , "morloc_mod" as (%)
+    , (+)
+    , (-)
+    , (*)
+    , (%/%) as (//)
+    , (%%) as (%)
+    , (**)
     )
   zero = 0
 
-instance Integral Real where
+instance Integral Real
+       , Integral Float32
+       , Integral Float64 where
+  %inline
   source R from "R/core.R"
     ( "morloc_neg" as neg
     , "morloc_abs" as abs
-    , "morloc_add" as (+)
-    , "morloc_sub" as (-)
-    , "morloc_mul" as (*)
-    , "morloc_div" as (//)
-    , "morloc_mod" as (%)
+    , (+)
+    , (-)
+    , (*)
+    , (%/%) as (//)
+    , "morloc_float_mod" as (%)
+    , (**)
     )
   zero = 0.0
 
-instance Numeric Real where
+instance Numeric Real
+       , Numeric Float32
+       , Numeric Float64 where
+  %inline
   source R from "R/core.R"
     ( "morloc_inv" as inv
-    , "morloc_div" as (/)
-    , "morloc_pow" as (**)
     , "morloc_ln" as ln
+    , (/)
     )
 
 instance Semigroup Str where
+  %inline
   source R from "R/core.R" ("morloc_str_add" as (<>))
 
 instance Monoid Str where
   mempty = ""
 
-instance Semigroup (List a) where
+-- List instances
+
+instance Semigroup (List a)
+       , Semigroup (Vector a)
+       , Semigroup (Deque a) where
+  %inline
   source R from "R/core.R" ("c" as (<>))
 
-instance Monoid (List a) where
+instance Monoid (List a)
+       , Monoid (Vector a)
+       , Monoid (Deque a) where
   mempty = []
 
+instance Functor List
+       , Functor Vector
+       , Functor Deque
+       , Functor Array where
+  %inline
+  source R from "R/core.R" ("morloc_map" as map)
 
--- List instances
-instance Foldable List where
+instance Foldable List
+       , Foldable Vector
+       , Foldable Deque
+       , Foldable Array where
+  %inline
   source R from "R/core.R"
     ( "morloc_fold" as fold
     , "morloc_fold1" as fold1
     , "morloc_safeFold1" as safeFold1
     )
 
-instance Functor List where
-  source R from "R/core.R" ("morloc_map" as map)
-
-instance Indexed List where
+instance Indexed List
+       , Indexed Vector
+       , Indexed Array where
+  %inline
   source R from "R/core.R"
     ( "morloc_at" as at
     , "morloc_slice" as slice
     )
 
-instance Stack List where
+instance Stack List
+       , Stack Deque where
+  %inline
   source R from "R/core.R"
     ( "morloc_cons" as cons
     , "morloc_uncons" as uncons
     )
 
-instance Queue List where
+instance Queue List
+       , Queue Deque
+       , Queue Vector where
+  %inline
   source R from "R/core.R"
     ( "morloc_snoc" as snoc
     , "morloc_unsnoc" as unsnoc
     )
-
-
--- Deque instances (R uses list for all sequence types)
-instance Foldable Deque where
-  source R from "R/core.R"
-    ( "morloc_fold" as fold
-    , "morloc_fold1" as fold1
-    , "morloc_safeFold1" as safeFold1
-    )
-
-instance Functor Deque where
-  source R from "R/core.R" ("morloc_map" as map)
-
-instance Stack Deque where
-  source R from "R/core.R"
-    ( "morloc_cons" as cons
-    , "morloc_uncons" as uncons
-    )
-
-instance Queue Deque where
-  source R from "R/core.R"
-    ( "morloc_snoc" as snoc
-    , "morloc_unsnoc" as unsnoc
-    )
-
-instance Semigroup (Deque a) where
-  source R from "R/core.R" ("c" as (<>))
-
-
--- Vector instances (R uses list for all sequence types)
-instance Foldable Vector where
-  source R from "R/core.R"
-    ( "morloc_fold" as fold
-    , "morloc_fold1" as fold1
-    , "morloc_safeFold1" as safeFold1
-    )
-
-instance Functor Vector where
-  source R from "R/core.R" ("morloc_map" as map)
-
-instance Indexed Vector where
-  source R from "R/core.R"
-    ( "morloc_at" as at
-    , "morloc_slice" as slice
-    )
-
-instance Queue Vector where
-  source R from "R/core.R"
-    ( "morloc_snoc" as snoc
-    , "morloc_unsnoc" as unsnoc
-    )
-
-instance Semigroup (Vector a) where
-  source R from "R/core.R" ("c" as (<>))
-
-
--- Array instances (R uses list for all sequence types)
-instance Foldable Array where
-  source R from "R/core.R"
-    ( "morloc_fold" as fold
-    , "morloc_fold1" as fold1
-    , "morloc_safeFold1" as safeFold1
-    )
-
-instance Functor Array where
-  source R from "R/core.R" ("morloc_map" as map)
-
-instance Indexed Array where
-  source R from "R/core.R"
-    ( "morloc_at" as at
-    , "morloc_slice" as slice
-    )
-
-instance Semigroup (Array a) where
-  source R from "R/core.R" ("c" as (<>))
-
 
 instance Show a where
   show x = @show x

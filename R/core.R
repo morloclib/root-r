@@ -93,16 +93,13 @@ morloc_branch <- function(cond, fa, fb, x) {
 
 morloc_neg <- function(x) (-1) * x
 morloc_abs <- function(x) abs(x)
-morloc_add <- function(x, y) x + y
-morloc_sub <- function(x, y) x - y
-morloc_mul <- function(x, y) x * y
-morloc_intdiv <- function(x, y) x %/% y
-morloc_mod <- function(x, y) x %% y
 
 morloc_inv <- function(x) 1 / x
-morloc_div <- function(x, y) x / y
-morloc_pow <- function(x, y) x ^ y
 morloc_ln <- function(x) log(x)
+
+morloc_float_mod <- function(x, y){
+  x - y * floor(x / y)
+}
 
 # --- Sequence operations ---
 
