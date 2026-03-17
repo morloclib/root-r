@@ -8,9 +8,15 @@ type R => Real = "numeric"
 type R => Str = "character"
 type R => Bool = "logical"
 type R => (List a) = "list" a
-type R => (Vector a) = "list" a
+type R => (Vector n a) = "list" a
 type R => (Array a) = "list" a
 type R => (Deque a) = "list" a
+type R => (Matrix m n a) = "list" a
+type R => (Tensor1 d1 a) = "array" a
+type R => (Tensor2 d1 d2 a) = "matrix" a
+type R => (Tensor3 d1 d2 d3 a) = "array" a
+type R => (Tensor4 d1 d2 d3 d4 a) = "array" a
+type R => (Tensor5 d1 d2 d3 d4 d5 a) = "array" a
 type R => (Tuple2 a b) = "list" a b
 type R => (Tuple3 a b c) = "list" a b c
 type R => (Tuple4 a b c d) = "list" a b c d
@@ -20,7 +26,7 @@ type R => (Tuple7 a b c d e f g) = "list" a b c d e f g
 type R => (Tuple8 a b c d e f g h) = "list" a b c d e f g h
 
 --' An identity function used to force R usage
-idr a :: a -> a
+idr :: a -> a
 
 source R from "R/core.R"
     ( "morloc_idr" as idr
@@ -49,7 +55,6 @@ source R from "R/core.R"
     , "morloc_range" as range
     , "morloc_rangeStep" as rangeStep
     , "morloc_toDeque" as toDeque
-    , "morloc_toVector" as toVector
     , "morloc_toArray" as toArray
     )
 
@@ -117,25 +122,21 @@ instance Monoid Str where
 -- List instances
 
 instance Semigroup (List a)
-       , Semigroup (Vector a)
        , Semigroup (Deque a) where
   %inline
   source R from "R/core.R" ("c" as (<>))
 
 instance Monoid (List a)
-       , Monoid (Vector a)
        , Monoid (Deque a) where
   mempty = []
 
 instance Functor List
-       , Functor Vector
        , Functor Deque
        , Functor Array where
   %inline
   source R from "R/core.R" ("morloc_map" as map)
 
 instance Foldable List
-       , Foldable Vector
        , Foldable Deque
        , Foldable Array where
   %inline
@@ -146,7 +147,6 @@ instance Foldable List
     )
 
 instance Indexed List
-       , Indexed Vector
        , Indexed Array where
   %inline
   source R from "R/core.R"
@@ -163,8 +163,7 @@ instance Stack List
     )
 
 instance Queue List
-       , Queue Deque
-       , Queue Vector where
+       , Queue Deque where
   %inline
   source R from "R/core.R"
     ( "morloc_snoc" as snoc
