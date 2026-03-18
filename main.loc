@@ -8,15 +8,15 @@ type R => Real = "numeric"
 type R => Str = "character"
 type R => Bool = "logical"
 type R => (List a) = "list" a
-type R => (Vector n a) = "list" a
 type R => (Array a) = "list" a
 type R => (Deque a) = "list" a
-type R => (Matrix m n a) = "list" a
-type R => (Tensor1 d1 a) = "array" a
-type R => (Tensor2 d1 d2 a) = "matrix" a
-type R => (Tensor3 d1 d2 d3 a) = "array" a
-type R => (Tensor4 d1 d2 d3 d4 a) = "array" a
-type R => (Tensor5 d1 d2 d3 d4 d5 a) = "array" a
+type R => (Vector (n :: Nat) a) = "list" a
+type R => (Matrix (m :: Nat) (n :: Nat) a) = "list" a
+type R => (Tensor1 (d1 :: Nat) a) = "array" a
+type R => (Tensor2 (d1 :: Nat) (d2 :: Nat) a) = "matrix" a
+type R => (Tensor3 (d1 :: Nat) (d2 :: Nat) (d3 :: Nat) a) = "array" a
+type R => (Tensor4 (d1 :: Nat) (d2 :: Nat) (d3 :: Nat) (d4 :: Nat) a) = "array" a
+type R => (Tensor5 (d1 :: Nat) (d2 :: Nat) (d3 :: Nat) (d4 :: Nat) (d5 :: Nat) a) = "array" a
 type R => (Tuple2 a b) = "list" a b
 type R => (Tuple3 a b c) = "list" a b c
 type R => (Tuple4 a b c d) = "list" a b c d
