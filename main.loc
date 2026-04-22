@@ -122,12 +122,14 @@ instance Monoid Str where
 -- List instances
 
 instance Semigroup (List a)
-       , Semigroup (Deque a) where
+       , Semigroup (Deque a)
+       , Semigroup (Array a) where
   %inline
   source R from "R/core.R" ("c" as (<>))
 
 instance Monoid (List a)
-       , Monoid (Deque a) where
+       , Monoid (Deque a)
+       , Monoid (Array a) where
   mempty = []
 
 instance Functor List
