@@ -30,7 +30,6 @@ idr :: a -> a
 
 source R from "R/core.R"
     ( "morloc_idr" as idr
-    , "morloc_branch" as branch
     , "morloc_not" as not
     , "morloc_and" as (&&)
     , "morloc_or" as (||)

@@ -46,11 +46,16 @@ morloc_eq <- function(x, y) {
   if (is.null(x) && is.null(y)) return(TRUE)
   if (is.null(x) || is.null(y)) return(FALSE)
 
-  # Check type compatibility
+  # Check type compatibility — allow integer/double comparison since
+  # morloc Int may arrive as R double (from 64-bit serialization) or
+  # as R integer (from literals like 0L).
   type_x <- typeof(x)
   type_y <- typeof(y)
 
-  if (type_x != type_y) return(FALSE)
+  if (type_x != type_y) {
+    numeric_types <- c("integer", "double")
+    if (!(type_x %in% numeric_types && type_y %in% numeric_types)) return(FALSE)
+  }
 
   # Check lengths match
   len_x <- length(x)
@@ -61,9 +66,15 @@ morloc_eq <- function(x, y) {
   # Handle empty objects
   if (len_x == 0) return(TRUE)
 
-  # For atomic vectors: use identical() which handles NA/NaN correctly
+  # For atomic vectors: use identical() which handles NA/NaN correctly.
+  # When types differ (integer vs double from 64-bit Int serialization),
+  # fall back to == which compares values across numeric types.
   if (is.atomic(x)) {
-    return(identical(x, y))
+    if (type_x == type_y) {
+      return(identical(x, y))
+    } else {
+      return(all(x == y))
+    }
   }
 
   # For lists: compare element-by-element recursively
@@ -78,16 +89,6 @@ morloc_eq <- function(x, y) {
 }
 
 morloc_le <- function(x, y) x <= y
-
-# --- Control flow ---
-
-morloc_branch <- function(cond, fa, fb, x) {
-  if (cond(x)) {
-    fa(x)
-  } else {
-    fb(x)
-  }
-}
 
 # --- Arithmetic operations ---
 
