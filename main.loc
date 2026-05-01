@@ -10,13 +10,21 @@ type R => Bool = "logical"
 type R => (List a) = "list" a
 type R => (Array a) = "list" a
 type R => (Deque a) = "list" a
-type R => (Vector (n :: Nat) a) = "list" a
-type R => (Matrix (m :: Nat) (n :: Nat) a) = "list" a
-type R => (Tensor1 (d1 :: Nat) a) = "array" a
-type R => (Tensor2 (d1 :: Nat) (d2 :: Nat) a) = "matrix" a
-type R => (Tensor3 (d1 :: Nat) (d2 :: Nat) (d3 :: Nat) a) = "array" a
-type R => (Tensor4 (d1 :: Nat) (d2 :: Nat) (d3 :: Nat) (d4 :: Nat) a) = "array" a
-type R => (Tensor5 (d1 :: Nat) (d2 :: Nat) (d3 :: Nat) (d4 :: Nat) (d5 :: Nat) a) = "array" a
+
+-- Fixed-width numeric types are distinct base types (different wire forms)
+-- but R has only "integer" (32-bit) and "numeric" (double) atomic kinds.
+-- 64-bit ints map to "numeric"; precision is lossy beyond 2^53 but this
+-- matches R's native handling of large integers.
+type R => Float64 = "numeric"
+type R => Float32 = "numeric"
+type R => Int64   = "numeric"
+type R => Int32   = "integer"
+type R => Int16   = "integer"
+type R => Int8    = "integer"
+type R => UInt64  = "numeric"
+type R => UInt32  = "numeric"
+type R => UInt16  = "integer"
+type R => UInt8   = "integer"
 type R => (Tuple2 a b) = "list" a b
 type R => (Tuple3 a b c) = "list" a b c
 type R => (Tuple4 a b c d) = "list" a b c d
