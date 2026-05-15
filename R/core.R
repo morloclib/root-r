@@ -376,14 +376,15 @@ morloc_groupSort <- function(xs) {
   result
 }
 
+# half-open interval [a, b), like Python's range and root's slice
 morloc_range <- function(a, b) {
-  if (a > b) return(list())
-  as.list(a:b)
+  if (a >= b) return(list())
+  as.list(a:(b - 1))
 }
 
 morloc_rangeStep <- function(a, b, step) {
-  if (a > b) return(list())
-  as.list(seq(a, b, by = step))
+  if (a >= b) return(list())
+  as.list(seq(a, b - 1, by = step))
 }
 
 # --- Readable operations ---
