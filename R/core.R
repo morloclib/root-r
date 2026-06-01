@@ -104,8 +104,18 @@ morloc_float_mod <- function(x, y){
 
 # --- Sequence operations ---
 
-# morloc is 0-based and R is 1-based, so indices need to be adjusted
+# One helper for every IndexLike instance. R's native integer is 32-bit, so
+# we deliberately use numeric (double) here to preserve bound values above
+# 2^31 - 1; downstream code converts back to integer for seq/[ as needed.
+morloc_to_index <- function(x) {
+  as.numeric(x)
+}
+
+# morloc is 0-based and R is 1-based, so indices need to be adjusted.
+# Negative indices wrap from the end (Python semantics): .[-1] is the last
+# element, .[-2] the second-to-last, etc.
 morloc_at <- function(i, xs) {
+  if (i < 0) i <- i + length(xs)
   if (is.list(xs)) {
     xs[[i + 1]]
   } else {
@@ -113,12 +123,42 @@ morloc_at <- function(i, xs) {
   }
 }
 
-# NOTE: i and j are expected to be 0-based
-morloc_slice <- function(i, j, xs) {
-  if ((i + 1) > j || (i + 1) > length(xs)) {
+# Python-style slice in 0-based indexing. NULL bounds default per step sign.
+# Bound arithmetic stays in `numeric` (double) to keep precision above 2^31 - 1
+# where R's primitive `integer` would silently truncate; the conversion back to
+# integer happens only at the final subscript step.
+morloc_slice <- function(start, stop, step, xs) {
+  n <- as.numeric(length(xs))
+  k <- if (is.null(step)) 1 else as.numeric(step)
+  if (k == 0) stop("slice step cannot be zero")
+  if (k > 0) {
+    i <- if (is.null(start)) 0 else as.numeric(start)
+    j <- if (is.null(stop))  n else as.numeric(stop)
+  } else {
+    i <- if (is.null(start)) n - 1 else as.numeric(start)
+    j <- if (is.null(stop))  -1    else as.numeric(stop)
+  }
+  # Negative indices wrap from the end (only when the bound was supplied).
+  if (i < 0 && !is.null(start)) i <- i + n
+  if (j < 0 && !is.null(stop))  j <- j + n
+  # Clamp positive-step bounds to valid range.
+  if (k > 0) {
+    i <- max(0, min(i, n))
+    j <- max(0, min(j, n))
+  } else {
+    i <- max(-1, min(i, n - 1))
+    j <- max(-1, min(j, n - 1))
+  }
+  # 0-based positions iterating from i toward j by k.
+  idx <- if (k > 0) {
+    if (i >= j) numeric(0) else seq(i, j - 1, by = k)
+  } else {
+    if (i <= j) numeric(0) else seq(i, j + 1, by = k)
+  }
+  if (length(idx) == 0) {
     xs[0]
   } else {
-    xs[(i + 1):min(j, length(xs))]
+    xs[idx + 1]
   }
 }
 
@@ -410,11 +450,4 @@ morloc_read_bool <- function(s) {
   if (s %in% c("false", "False", "FALSE")) return(FALSE)
   return(NULL)
 }
-
-# --- Sequence conversions ---
-# In R, all sequence types map to list, so these are identity functions
-
-morloc_toDeque <- function(xs) xs
-morloc_toVector <- function(xs) xs
-morloc_toArray <- function(xs) xs
 

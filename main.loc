@@ -8,7 +8,6 @@ type R => Real = "numeric"
 type R => Str = "character"
 type R => Bool = "logical"
 type R => (List a) = "list" a
-type R => (Array a) = "list" a
 type R => (Deque a) = "list" a
 
 -- Fixed-width numeric types are distinct base types (different wire forms)
@@ -66,8 +65,6 @@ source R from "R/core.R"
     , "morloc_groupSort" as groupSort
     , "morloc_range" as range
     , "morloc_rangeStep" as rangeStep
-    , "morloc_toDeque" as toDeque
-    , "morloc_toArray" as toArray
     )
 
 instance Eq a where
@@ -149,25 +146,21 @@ instance Monoid Str where
 -- List instances
 
 instance Semigroup (List a)
-       , Semigroup (Deque a)
-       , Semigroup (Array a) where
+       , Semigroup (Deque a) where
   %inline
   source R from "R/core.R" ("c" as (<>))
 
 instance Monoid (List a)
-       , Monoid (Deque a)
-       , Monoid (Array a) where
+       , Monoid (Deque a) where
   mempty = []
 
 instance Functor List
-       , Functor Deque
-       , Functor Array where
+       , Functor Deque where
   %inline
   source R from "R/core.R" ("morloc_map" as map)
 
 instance Foldable List
-       , Foldable Deque
-       , Foldable Array where
+       , Foldable Deque where
   %inline
   source R from "R/core.R"
     ( "morloc_fold" as fold
@@ -175,13 +168,25 @@ instance Foldable List
     , "morloc_safeFold1" as safeFold1
     )
 
-instance Indexed List
-       , Indexed Array where
+instance Indexable List where
   %inline
-  source R from "R/core.R"
-    ( "morloc_at" as at
-    , "morloc_slice" as slice
-    )
+  source R from "R/core.R" ("morloc_at" as __access_index__)
+
+instance Sliceable List where
+  %inline
+  source R from "R/core.R" ("morloc_slice" as __get_slice__)
+
+instance IndexLike Int
+       , IndexLike Int8
+       , IndexLike Int16
+       , IndexLike Int32
+       , IndexLike Int64
+       , IndexLike UInt8
+       , IndexLike UInt16
+       , IndexLike UInt32
+       , IndexLike UInt64 where
+  %inline
+  source R from "R/core.R" ("morloc_to_index" as __to_index__)
 
 instance Stack List
        , Stack Deque where
@@ -216,4 +221,15 @@ instance Packable (Int) Unit where
   source R from "R/data.R"
    ( "morloc_packUnit" as pack
    , "morloc_unpackUnit" as unpack
+   )
+
+-- R uses @list@ for both List and Deque, so pack/unpack are identity
+-- functions. The pair is declared so that downstream consumers find a
+-- @Packable (List a) (Deque a)@ entry for R; the per-language form
+-- match means the codegen dispatch short-circuits without invoking
+-- the sources.
+instance Packable (List a) (Deque a) where
+  source R from "R/core.R"
+   ( "morloc_idr" as pack
+   , "morloc_idr" as unpack
    )
