@@ -184,7 +184,16 @@ instance IndexLike Int
        , IndexLike UInt8
        , IndexLike UInt16
        , IndexLike UInt32
-       , IndexLike UInt64 where
+       , IndexLike UInt64
+       , IndexLike (?Int)
+       , IndexLike (?Int8)
+       , IndexLike (?Int16)
+       , IndexLike (?Int32)
+       , IndexLike (?Int64)
+       , IndexLike (?UInt8)
+       , IndexLike (?UInt16)
+       , IndexLike (?UInt32)
+       , IndexLike (?UInt64) where
   %inline
   source R from "R/core.R" ("morloc_to_index" as __to_index__)
 

@@ -42,8 +42,17 @@ morloc_eq <- function(x, y) {
   attributes(x) <- NULL
   attributes(y) <- NULL
 
-  # Handle NULL cases first
-  if (is.null(x) && is.null(y)) return(TRUE)
+  # Empty values of any representation -- NULL, integer(0), numeric(0),
+  # list(), character(0) -- all have length 0 and represent the same
+  # morloc value @[]@. Treat any two length-zero values as equal,
+  # regardless of type. This matters because the R codegen emits the
+  # morloc literal @[]@ as @c()@ (which is @NULL@) while a length-zero
+  # subscript on a typed vector keeps that vector's type
+  # (@numeric(0)@, @integer(0)@, ...); the slicer-vs-literal comparison
+  # @.[a:b] xs == []@ depends on these comparing equal.
+  len_x <- length(x)
+  len_y <- length(y)
+  if (len_x == 0 && len_y == 0) return(TRUE)
   if (is.null(x) || is.null(y)) return(FALSE)
 
   # Check type compatibility — allow integer/double comparison since
@@ -57,14 +66,8 @@ morloc_eq <- function(x, y) {
     if (!(type_x %in% numeric_types && type_y %in% numeric_types)) return(FALSE)
   }
 
-  # Check lengths match
-  len_x <- length(x)
-  len_y <- length(y)
-
+  # Length mismatch (the both-zero case is already handled above).
   if (len_x != len_y) return(FALSE)
-
-  # Handle empty objects
-  if (len_x == 0) return(TRUE)
 
   # For atomic vectors: use identical() which handles NA/NaN correctly.
   # When types differ (integer vs double from 64-bit Int serialization),
@@ -108,13 +111,20 @@ morloc_float_mod <- function(x, y){
 # we deliberately use numeric (double) here to preserve bound values above
 # 2^31 - 1; downstream code converts back to integer for seq/[ as needed.
 morloc_to_index <- function(x) {
-  as.numeric(x)
+  # Returns NULL or numeric. NULL passes through so slicer bounds can be
+  # left blank (the desugar emits `(Null :: ?Int64)` for an empty
+  # position, and a user expression evaluating to NULL composes the
+  # same way).
+  if (is.null(x)) NULL else as.numeric(x)
 }
 
 # morloc is 0-based and R is 1-based, so indices need to be adjusted.
 # Negative indices wrap from the end (Python semantics): .[-1] is the last
 # element, .[-2] the second-to-last, etc.
 morloc_at <- function(i, xs) {
+  # __access_index__ takes ?Int64 to match __to_index__'s return shape,
+  # but a NULL index has no semantic meaning at runtime.
+  if (is.null(i)) stop("morloc_at: index is NULL")
   if (i < 0) i <- i + length(xs)
   if (is.list(xs)) {
     xs[[i + 1]]
