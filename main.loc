@@ -46,7 +46,6 @@ source R from "R/core.R"
     , "morloc_and" as (&&)
     , "morloc_or" as (||)
     , "morloc_zipWith" as zipWith
-    , "rev" as reverse
     , "morloc_sort" as sort
     , "morloc_sortBy" as sortBy
     , "Filter" as filter
