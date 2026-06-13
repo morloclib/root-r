@@ -173,29 +173,31 @@ morloc_slice <- function(start, stop, step, xs) {
 }
 
 morloc_map <- function(f, xs) {
-  if (length(xs) == 0) {
+  n <- length(xs)
+  if (n == 0) {
     return(list())
   }
 
+  # Probe the first element to choose the output container. The previous
+  # implementation then called `vapply(xs, f, ...)` which re-evaluated the
+  # first element, doubling its cost for any non-trivial `f`. Skip index 1
+  # in the vapply/lapply pass and prepend `first_result` instead.
   first_result <- f(xs[[1]])
 
   if (length(first_result) == 1 && is.atomic(first_result)) {
-    if (is.logical(first_result)) {
-      return(vapply(xs, f, FUN.VALUE = logical(1)))
-    } else if (is.integer(first_result)) {
-      return(vapply(xs, f, FUN.VALUE = integer(1)))
-    } else if (is.double(first_result) || is.numeric(first_result)) {
-      return(vapply(xs, f, FUN.VALUE = numeric(1)))
-    } else if (is.character(first_result)) {
-      return(vapply(xs, f, FUN.VALUE = character(1)))
-    } else if (is.raw(first_result)) {
-      return(vapply(xs, f, FUN.VALUE = raw(1)))
-    } else if (is.complex(first_result)) {
-      return(vapply(xs, f, FUN.VALUE = complex(1)))
+    if (n == 1L) {
+      return(first_result)
     }
+    fun_value <- vector(typeof(first_result), 1L)
+    rest <- vapply(xs[-1L], f, FUN.VALUE = fun_value)
+    return(c(first_result, rest))
   }
 
-  return(lapply(xs, f))
+  if (n == 1L) {
+    return(list(first_result))
+  }
+  rest <- lapply(xs[-1L], f)
+  return(c(list(first_result), rest))
 }
 
 morloc_sort <- function(xs) {
