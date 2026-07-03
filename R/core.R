@@ -6,6 +6,14 @@ morloc_not <- function(x) !x
 morloc_and <- function(x, y) x && y
 morloc_or <- function(x, y) x || y
 
+morloc_size_str <- function(x){
+  nchar(x)
+}
+
+morloc_size_vec <- function(x){
+  length(x)
+}
+
 # --- Comparison operations ---
 
 ### Claude Sonnet 4.5
