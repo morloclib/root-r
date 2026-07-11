@@ -250,3 +250,187 @@ instance Packable (List a) (Deque a) where
    ( "morloc_idr" as pack
    , "morloc_idr" as unpack
    )
+
+
+
+-------------------------------------------------------------------------------
+--                 Conversion types
+-------------------------------------------------------------------------------
+
+instance RealLike Int
+       , RealLike Int8
+       , RealLike Int16
+       , RealLike Int32
+       , RealLike Int64
+       , RealLike UInt8
+       , RealLike UInt16
+       , RealLike UInt32
+       , RealLike UInt64
+       , RealLike Float32
+       , RealLike Float64
+       , RealLike Real where
+  %inline
+  source R from "R/core.R" ("morloc_to_real" as toReal)
+
+-- TotalInto: lossless total conversions. R has three numeric runtimes
+-- (integer, numeric, bit64); target-driven dispatch picks the right cast.
+
+instance TotalInto UInt8 UInt16 where
+  %inline source R from "R/core.R" ("morloc_into_integer" as into)
+
+instance TotalInto UInt8 UInt32
+       , TotalInto UInt16 UInt32 where
+  %inline source R from "R/core.R" ("morloc_into_numeric" as into)
+
+instance TotalInto UInt8 UInt64
+       , TotalInto UInt16 UInt64
+       , TotalInto UInt32 UInt64 where
+  %inline source R from "R/core.R" ("morloc_into_numeric" as into)
+
+instance TotalInto Int8 Int16
+       , TotalInto UInt8 Int16 where
+  %inline source R from "R/core.R" ("morloc_into_integer" as into)
+
+instance TotalInto Int8 Int32
+       , TotalInto Int16 Int32
+       , TotalInto UInt8 Int32
+       , TotalInto UInt16 Int32 where
+  %inline source R from "R/core.R" ("morloc_into_numeric" as into)
+
+instance TotalInto Int8 Int64
+       , TotalInto Int16 Int64
+       , TotalInto Int32 Int64
+       , TotalInto UInt8 Int64
+       , TotalInto UInt16 Int64
+       , TotalInto UInt32 Int64 where
+  %inline source R from "R/core.R" ("morloc_into_bit64" as into)
+
+instance TotalInto Int8 Int
+       , TotalInto Int16 Int
+       , TotalInto Int32 Int
+       , TotalInto UInt8 Int
+       , TotalInto UInt16 Int where
+  %inline source R from "R/core.R" ("morloc_into_integer" as into)
+
+instance TotalInto Int8 Float32
+       , TotalInto Int16 Float32
+       , TotalInto UInt8 Float32
+       , TotalInto UInt16 Float32 where
+  %inline source R from "R/core.R" ("morloc_into_numeric" as into)
+
+instance TotalInto Int8 Float64
+       , TotalInto Int16 Float64
+       , TotalInto Int32 Float64
+       , TotalInto UInt8 Float64
+       , TotalInto UInt16 Float64
+       , TotalInto UInt32 Float64
+       , TotalInto Float32 Float64
+       , TotalInto Real Float64 where
+  %inline source R from "R/core.R" ("morloc_into_numeric" as into)
+
+instance TotalInto Int8 Real
+       , TotalInto Int16 Real
+       , TotalInto Int32 Real
+       , TotalInto UInt8 Real
+       , TotalInto UInt16 Real
+       , TotalInto UInt32 Real
+       , TotalInto Float32 Real
+       , TotalInto Float64 Real where
+  %inline source R from "R/core.R" ("morloc_into_numeric" as into)
+
+-- PartialInto: bounds-checked conversions, grouped by target.
+
+instance PartialInto UInt16 UInt8
+       , PartialInto UInt32 UInt8
+       , PartialInto UInt64 UInt8
+       , PartialInto Int8 UInt8
+       , PartialInto Int16 UInt8
+       , PartialInto Int32 UInt8
+       , PartialInto Int64 UInt8
+       , PartialInto Float32 UInt8
+       , PartialInto Float64 UInt8
+       , PartialInto Real UInt8
+       , PartialInto Int UInt8 where
+  %inline source R from "R/core.R" ("morloc_try_u8" as tryInto)
+
+instance PartialInto UInt32 UInt16
+       , PartialInto UInt64 UInt16
+       , PartialInto Int8 UInt16
+       , PartialInto Int16 UInt16
+       , PartialInto Int32 UInt16
+       , PartialInto Int64 UInt16
+       , PartialInto Float32 UInt16
+       , PartialInto Float64 UInt16
+       , PartialInto Real UInt16
+       , PartialInto Int UInt16 where
+  %inline source R from "R/core.R" ("morloc_try_u16" as tryInto)
+
+instance PartialInto UInt64 UInt32
+       , PartialInto Int8 UInt32
+       , PartialInto Int16 UInt32
+       , PartialInto Int32 UInt32
+       , PartialInto Int64 UInt32
+       , PartialInto Float32 UInt32
+       , PartialInto Float64 UInt32
+       , PartialInto Real UInt32
+       , PartialInto Int UInt32 where
+  %inline source R from "R/core.R" ("morloc_try_u32" as tryInto)
+
+instance PartialInto Int8 UInt64
+       , PartialInto Int16 UInt64
+       , PartialInto Int32 UInt64
+       , PartialInto Int64 UInt64
+       , PartialInto Float32 UInt64
+       , PartialInto Float64 UInt64
+       , PartialInto Real UInt64
+       , PartialInto Int UInt64 where
+  %inline source R from "R/core.R" ("morloc_try_u64" as tryInto)
+
+instance PartialInto UInt8 Int8
+       , PartialInto UInt16 Int8
+       , PartialInto UInt32 Int8
+       , PartialInto UInt64 Int8
+       , PartialInto Int16 Int8
+       , PartialInto Int32 Int8
+       , PartialInto Int64 Int8
+       , PartialInto Float32 Int8
+       , PartialInto Float64 Int8
+       , PartialInto Real Int8
+       , PartialInto Int Int8 where
+  %inline source R from "R/core.R" ("morloc_try_i8" as tryInto)
+
+instance PartialInto UInt16 Int16
+       , PartialInto UInt32 Int16
+       , PartialInto UInt64 Int16
+       , PartialInto Int32 Int16
+       , PartialInto Int64 Int16
+       , PartialInto Float32 Int16
+       , PartialInto Float64 Int16
+       , PartialInto Real Int16
+       , PartialInto Int Int16 where
+  %inline source R from "R/core.R" ("morloc_try_i16" as tryInto)
+
+instance PartialInto UInt32 Int32
+       , PartialInto UInt64 Int32
+       , PartialInto Int64 Int32
+       , PartialInto Float32 Int32
+       , PartialInto Float64 Int32
+       , PartialInto Real Int32
+       , PartialInto Int Int32 where
+  %inline source R from "R/core.R" ("morloc_try_i32" as tryInto)
+
+instance PartialInto UInt64 Int64
+       , PartialInto Float32 Int64
+       , PartialInto Float64 Int64
+       , PartialInto Real Int64
+       , PartialInto Int Int64 where
+  %inline source R from "R/core.R" ("morloc_try_i64" as tryInto)
+
+instance PartialInto UInt32 Int
+       , PartialInto UInt64 Int
+       , PartialInto Int64 Int
+       , PartialInto Float32 Int
+       , PartialInto Float64 Int
+       , PartialInto Real Int where
+  %inline source R from "R/core.R" ("morloc_try_int" as tryInto)
+

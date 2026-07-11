@@ -109,6 +109,42 @@ morloc_abs <- function(x) abs(x)
 morloc_inv <- function(x) 1 / x
 morloc_ln <- function(x) log(x)
 
+morloc_to_real <- function(x) as.numeric(x)
+
+# --- Numeric conversions ---
+#
+# TotalInto: one function per R runtime type. as.integer/as.numeric/as.integer64
+# subsume the entire lossless-widening lattice because R has only three numeric
+# runtimes (integer = 32-bit, numeric = double, integer64 via bit64).
+
+morloc_into_integer <- function(x) as.integer(x)
+morloc_into_numeric <- function(x) as.numeric(x)
+morloc_into_bit64   <- function(x) bit64::as.integer64(x)
+
+# PartialInto: bounds-checked conversions to each morloc target. NULL for the
+# ?a error sentinel. Float sources must be finite and integer-valued.
+
+.morloc_try_int <- function(x, lo, hi, cast){
+  if (is.null(x) || length(x) == 0) return(NULL)
+  if (is.na(x)) return(NULL)
+  if (is.double(x)){
+    if (!is.finite(x)) return(NULL)
+    if (x != floor(x)) return(NULL)
+  }
+  if (x < lo || x > hi) return(NULL)
+  cast(x)
+}
+
+morloc_try_u8  <- function(x) .morloc_try_int(x, 0, 255, as.integer)
+morloc_try_u16 <- function(x) .morloc_try_int(x, 0, 65535, as.integer)
+morloc_try_u32 <- function(x) .morloc_try_int(x, 0, 4294967295, as.numeric)
+morloc_try_u64 <- function(x) .morloc_try_int(x, 0, 2^64 - 1, as.numeric)
+morloc_try_i8  <- function(x) .morloc_try_int(x, -128, 127, as.integer)
+morloc_try_i16 <- function(x) .morloc_try_int(x, -32768, 32767, as.integer)
+morloc_try_i32 <- function(x) .morloc_try_int(x, -2147483648, 2147483647, as.numeric)
+morloc_try_i64 <- function(x) .morloc_try_int(x, -2^63, 2^63 - 1, function(v) bit64::as.integer64(v))
+morloc_try_int <- function(x) .morloc_try_int(x, -2147483648, 2147483647, as.integer)
+
 morloc_float_mod <- function(x, y){
   x - y * floor(x / y)
 }
