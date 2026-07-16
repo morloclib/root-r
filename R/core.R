@@ -3,8 +3,6 @@ morloc_idr <- function(x) x
 # --- Boolean operations ---
 
 morloc_not <- function(x) !x
-morloc_and <- function(x, y) x && y
-morloc_or <- function(x, y) x || y
 
 morloc_size_str <- function(x){
   nchar(x)
