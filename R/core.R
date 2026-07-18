@@ -119,17 +119,18 @@ morloc_into_integer <- function(x) as.integer(x)
 morloc_into_numeric <- function(x) as.numeric(x)
 morloc_into_bit64   <- function(x) bit64::as.integer64(x)
 
-# PartialInto: bounds-checked conversions to each morloc target. NULL for the
-# ?a error sentinel. Float sources must be finite and integer-valued.
+# PartialInto: bounds-checked conversions to each morloc target. Failures
+# raise via stop() so the <Err> effect propagates to the nearest @catch.
+# Float sources must be finite and integer-valued.
 
 .morloc_try_int <- function(x, lo, hi, cast){
-  if (is.null(x) || length(x) == 0) return(NULL)
-  if (is.na(x)) return(NULL)
+  if (is.null(x) || length(x) == 0) stop("cannot convert empty value to integer")
+  if (is.na(x)) stop("cannot convert NA to integer")
   if (is.double(x)){
-    if (!is.finite(x)) return(NULL)
-    if (x != floor(x)) return(NULL)
+    if (!is.finite(x)) stop("cannot convert non-finite float to integer")
+    if (x != floor(x)) stop("cannot convert non-integer float to integer")
   }
-  if (x < lo || x > hi) return(NULL)
+  if (x < lo || x > hi) stop(sprintf("value %s out of range [%s, %s]", format(x), format(lo), format(hi)))
   cast(x)
 }
 
@@ -479,29 +480,5 @@ morloc_range <- function(a, b) {
 morloc_rangeStep <- function(a, b, step) {
   if (a >= b) return(list())
   as.list(seq(a, b - 1, by = step))
-}
-
-# --- Readable operations ---
-
-morloc_read_int <- function(s) {
-  result <- suppressWarnings(as.integer(s))
-  if (is.na(result)) return(NULL)
-  result
-}
-
-morloc_read_real <- function(s) {
-  result <- suppressWarnings(as.numeric(s))
-  if (is.na(result)) return(NULL)
-  result
-}
-
-morloc_read_str <- function(s) {
-  s
-}
-
-morloc_read_bool <- function(s) {
-  if (s %in% c("true", "True", "TRUE")) return(TRUE)
-  if (s %in% c("false", "False", "FALSE")) return(FALSE)
-  return(NULL)
 }
 
