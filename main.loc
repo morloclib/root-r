@@ -32,6 +32,7 @@ type R => U8   = "integer"
 type R => (IFile a) = "bit64" a
 type R => (IStream a) = "bit64" a
 type R => (OStream a) = "bit64" a
+type R => (Cell a) = "bit64" a
 type R => (Tuple2 a b) = "list" a b
 type R => (Tuple3 a b c) = "list" a b c
 type R => (Tuple4 a b c d) = "list" a b c d
