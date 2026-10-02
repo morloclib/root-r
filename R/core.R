@@ -243,21 +243,24 @@ morloc_map <- function(f, xs) {
   return(c(list(first_result), rest))
 }
 
+# Sorting uses method = "radix", which orders strings by code point as every
+# other language does; R's default follows the locale's collation, so the
+# same function would order differently depending on where it ran.
 morloc_sort <- function(xs) {
   if (length(xs) <= 1) return(xs)
   if (is.list(xs)) {
     if (length(xs) > 0 && is.list(xs[[1]])) {
       keys <- sapply(xs, function(x) x[[1]])
-      idx <- order(keys)
+      idx <- order(keys, method = "radix")
       result <- vector("list", length(xs))
       for (i in seq_along(idx)) {
         result[[i]] <- xs[[idx[i]]]
       }
       return(result)
     }
-    return(xs[order(unlist(xs))])
+    return(xs[order(unlist(xs), method = "radix")])
   } else {
-    return(sort(xs))
+    return(sort(xs, method = "radix"))
   }
 }
 
@@ -462,7 +465,7 @@ morloc_groupSort <- function(xs) {
   if (length(xs) == 0) return(list())
   keys <- sapply(xs, function(x) x[[1]])
   vals <- lapply(xs, function(x) x[[2]])
-  unique_keys <- sort(unique(keys))
+  unique_keys <- sort(unique(keys), method = "radix")
   result <- list()
   for (k in unique_keys) {
     group_vals <- vals[keys == k]
