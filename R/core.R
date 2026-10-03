@@ -144,6 +144,20 @@ morloc_try_i32 <- function(x) .morloc_try_int(x, -2147483648, 2147483647, as.num
 morloc_try_i64 <- function(x) .morloc_try_int(x, -2^63, 2^63 - 1, function(v) bit64::as.integer64(v))
 morloc_try_int <- function(x) .morloc_try_int(x, -2147483648, 2147483647, as.integer)
 
+# Integer `//` and `%` are C's: the quotient truncates toward zero and the
+# remainder takes the dividend's sign. A zero divisor is an error, where
+# `%/%` and `%%` would give NA.
+morloc_int_div <- function(x, y){
+  if (y == 0) stop("integer division by zero")
+  x %/% y + ((x %% y != 0) & ((x < 0) != (y < 0)))
+}
+
+morloc_int_mod <- function(x, y){
+  if (y == 0) stop("integer modulo by zero")
+  r <- x %% y
+  r - y * ((r != 0) & ((x < 0) != (y < 0)))
+}
+
 morloc_float_mod <- function(x, y){
   x - y * floor(x / y)
 }

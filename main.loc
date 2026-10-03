@@ -98,8 +98,8 @@ instance Integral Int
     , (+)
     , (-)
     , (*)
-    , (%/%) as (//)
-    , (%%) as (%)
+    , "morloc_int_div" as (//)
+    , "morloc_int_mod" as (%)
     , (**)
     )
   zero = 0
