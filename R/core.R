@@ -42,6 +42,11 @@ morloc_size_vec <- function(x){
 #' - Nested structures: Recursively compared
 #' - Different length: Always FALSE, no recycling
 morloc_eq <- function(x, y) {
+  # A bit64 integer64 stores its value as the bits of a double, so it is
+  # compared before its class is stripped.
+  if (inherits(x, "integer64") || inherits(y, "integer64")) {
+    return(.morloc_eq_integer64(x, y))
+  }
   # Strip all attributes to compare data only
   x <- unclass(x)
   y <- unclass(y)
@@ -60,6 +65,13 @@ morloc_eq <- function(x, y) {
   len_y <- length(y)
   if (len_x == 0 && len_y == 0) return(TRUE)
   if (is.null(x) || is.null(y)) return(FALSE)
+
+  # A morloc list reaches R as an atomic vector (decoded, or built by map)
+  # or as an R list (a literal), so the two compare element by element.
+  if (is.list(x) != is.list(y)) {
+    if (len_x != len_y) return(FALSE)
+    return(all(vapply(seq_len(len_x), function(i) morloc_eq(x[[i]], y[[i]]), logical(1))))
+  }
 
   # Check type compatibility — allow integer/double comparison since
   # morloc Int may arrive as R double (from 64-bit serialization) or
@@ -97,11 +109,19 @@ morloc_eq <- function(x, y) {
   return(identical(x, y))
 }
 
+.morloc_eq_integer64 <- function(x, y) {
+  if (length(x) != length(y)) return(FALSE)
+  if (length(x) == 0) return(TRUE)
+  whole <- function(v) inherits(v, "integer64") || (is.numeric(v) && isTRUE(all(v == trunc(v))))
+  if (!whole(x) || !whole(y)) return(FALSE)
+  isTRUE(all(bit64::as.integer64(x) == bit64::as.integer64(y)))
+}
+
 morloc_le <- function(x, y) x <= y
 
 # --- Arithmetic operations ---
 
-morloc_neg <- function(x) (-1) * x
+morloc_neg <- function(x) -x
 morloc_abs <- function(x) abs(x)
 
 morloc_inv <- function(x) 1 / x
@@ -115,7 +135,12 @@ morloc_to_real <- function(x) as.numeric(x)
 # subsume the entire lossless-widening lattice because R has only three numeric
 # runtimes (integer = 32-bit, numeric = double, integer64 via bit64).
 
-morloc_into_integer <- function(x) as.integer(x)
+morloc_into_integer <- function(x) {
+  r <- suppressWarnings(as.integer(x))
+  # R's integer is 32-bit with its minimum reserved for NA
+  if (any(is.na(r) & !is.na(x))) stop("value does not fit in R's integer (-2147483647 to 2147483647)")
+  r
+}
 morloc_into_numeric <- function(x) as.numeric(x)
 morloc_into_bit64   <- function(x) bit64::as.integer64(x)
 
@@ -126,23 +151,24 @@ morloc_into_bit64   <- function(x) bit64::as.integer64(x)
 .morloc_try_int <- function(x, lo, hi, cast){
   if (is.null(x) || length(x) == 0) stop("cannot convert empty value to integer")
   if (is.na(x)) stop("cannot convert NA to integer")
-  if (is.double(x)){
+  if (is.double(x) && !inherits(x, "integer64")){
     if (!is.finite(x)) stop("cannot convert non-finite float to integer")
     if (x != floor(x)) stop("cannot convert non-integer float to integer")
   }
-  if (x < lo || x > hi) stop(sprintf("value %s out of range [%s, %s]", format(x), format(lo), format(hi)))
+  if (!isTRUE(x >= lo && x <= hi)) stop(sprintf("value %s out of range [%s, %s]", format(x), format(lo), format(hi)))
   cast(x)
 }
 
 morloc_try_u8  <- function(x) .morloc_try_int(x, 0, 255, as.integer)
 morloc_try_u16 <- function(x) .morloc_try_int(x, 0, 65535, as.integer)
 morloc_try_u32 <- function(x) .morloc_try_int(x, 0, 4294967295, as.numeric)
-morloc_try_u64 <- function(x) .morloc_try_int(x, 0, 2^64 - 1, as.numeric)
+# U64 is bit64 in R, which is signed: values >= 2^63 are out of reach.
+morloc_try_u64 <- function(x) .morloc_try_int(x, 0, bit64::as.integer64("9223372036854775807"), bit64::as.integer64)
 morloc_try_i8  <- function(x) .morloc_try_int(x, -128, 127, as.integer)
 morloc_try_i16 <- function(x) .morloc_try_int(x, -32768, 32767, as.integer)
 morloc_try_i32 <- function(x) .morloc_try_int(x, -2147483648, 2147483647, as.numeric)
-morloc_try_i64 <- function(x) .morloc_try_int(x, -2^63, 2^63 - 1, function(v) bit64::as.integer64(v))
-morloc_try_int <- function(x) .morloc_try_int(x, -2147483648, 2147483647, as.integer)
+morloc_try_i64 <- function(x) .morloc_try_int(x, bit64::as.integer64("-9223372036854775807"), bit64::as.integer64("9223372036854775807"), bit64::as.integer64)
+morloc_try_int <- function(x) .morloc_try_int(x, -2147483647, 2147483647, as.integer)
 
 # Integer `//` and `%` are C's: the quotient truncates toward zero and the
 # remainder takes the dividend's sign. A zero divisor is an error, where
@@ -244,6 +270,16 @@ morloc_map <- function(f, xs) {
   if (length(first_result) == 1 && is.atomic(first_result)) {
     if (n == 1L) {
       return(first_result)
+    }
+    # A morloc integer may be an R integer, double or bit64 integer64 (a
+    # double vector with a class), and one call may return different forms
+    # for different elements, so the first result cannot fix the type.
+    if (inherits(first_result, "integer64") || typeof(first_result) %in% c("integer", "double")) {
+      results <- c(list(first_result), lapply(xs[-1L], f))
+      if (any(vapply(results, inherits, logical(1), "integer64"))) {
+        return(do.call(c, lapply(results, bit64::as.integer64)))
+      }
+      return(unlist(results, use.names = FALSE))
     }
     fun_value <- vector(typeof(first_result), 1L)
     rest <- vapply(xs[-1L], f, FUN.VALUE = fun_value)
