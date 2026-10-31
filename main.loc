@@ -149,6 +149,8 @@ instance Semigroup Str where
 
 instance Monoid Str where
   mempty = ""
+  %inline
+  source R from "R/core.R" ("morloc_str_mconcat" as mconcat)
 
 -- List instances
 
@@ -160,6 +162,8 @@ instance Semigroup (List a)
 instance Monoid (List a)
        , Monoid (Deque a) where
   mempty = []
+  %inline
+  source R from "R/core.R" ("morloc_list_mconcat" as mconcat)
 
 instance Functor List
        , Functor Deque where

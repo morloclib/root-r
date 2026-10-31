@@ -435,6 +435,21 @@ morloc_enumerate <- function(xs) {
 
 morloc_str_add <- function(x, y) paste0(x, y)
 
+morloc_str_mconcat <- function(xs) paste0(xs, collapse = "")
+
+# Names on the parts would become arguments of `c`, and `c` dispatches on its
+# first argument, so empty parts are dropped to let a classed part (integer64)
+# lead.
+morloc_list_mconcat <- function(xss) {
+    xss <- unname(xss)
+    parts <- Filter(length, xss)
+    if (length(parts) == 0) {
+        if (length(xss) == 0) NULL else xss[[1]]
+    } else {
+        do.call(c, parts)
+    }
+}
+
 # --- Stack operations ---
 
 morloc_cons <- function(x, xs) {
