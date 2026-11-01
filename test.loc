@@ -1,5 +1,7 @@
 module test-root-r (test)
 
-import root.test (test)
+import root.test (rootSuite)
 import root-r
 import map-r
+
+test = rootSuite False
